@@ -66,6 +66,18 @@
 
   html { scroll-behavior: smooth; }
 
+  html, body { height: 100%; }
+
+  .snap-deck {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    height: 100vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+  .snap-deck::-webkit-scrollbar { width: 0; display: none; }
+  .snap-deck { scrollbar-width: none; }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;

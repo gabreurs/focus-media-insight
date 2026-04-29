@@ -55,9 +55,9 @@ export const calendario = [
     periodo: "01 — 07 Maio",
     foco: "Chegada",
     itens: [
-      "Post de chegada — A Focus Media chegou ao Brasil.",
-      "Story de bastidor — primeiros movimentos da operação.",
-      "Post LinkedIn institucional — anúncio para o mercado.",
+      "Post estático de chegada — A Focus Media chegou ao Brasil.",
+      "Carrossel institucional — apresentação da marca ao mercado brasileiro.",
+      "Edição de reels institucional (a partir de gravações fornecidas pelo cliente).",
     ],
   },
   {
@@ -65,9 +65,9 @@ export const calendario = [
     periodo: "08 — 14 Maio",
     foco: "Apresentação",
     itens: [
-      "Carrossel institucional — quem é a Focus Media.",
-      "Reels curto — onde a Focus está e como atua.",
-      "Post LinkedIn — leitura do momento da mídia em edifícios.",
+      "Carrossel — quem é a Focus Media e onde atua no mundo.",
+      "Post estático — autoridade global em mídia DOOH em edifícios.",
+      "Edição de reels — leitura do momento da mídia em edifícios.",
     ],
   },
   {
@@ -76,9 +76,9 @@ export const calendario = [
     foco: "Oferta e Expo Síndico",
     itens: [
       "Carrossel — o que a Focus oferece no Brasil.",
-      "Conteúdo dedicado à participação na Expo Síndico (21/05).",
+      "Post estático dedicado à participação na Expo Síndico (21/05).",
       "Folder impresso para o stand — material de apoio comercial.",
-      "Stories ao vivo do evento.",
+      "Edição de reels do evento (a partir de gravações fornecidas pelo cliente).",
     ],
   },
   {
@@ -86,10 +86,10 @@ export const calendario = [
     periodo: "22 — 31 Maio",
     foco: "Relacionamento",
     itens: [
-      "Conteúdo voltado a síndicos e administradoras.",
-      "Conteúdo voltado a marcas e agências.",
-      "Reels de fechamento do ciclo — presença e abertura.",
-      "Material comercial para WhatsApp.",
+      "Carrossel voltado a síndicos e administradoras.",
+      "Post estático voltado a marcas e agências.",
+      "Edição de reels de fechamento do ciclo — presença e abertura.",
+      "Peças comerciais estáticas para WhatsApp.",
     ],
   },
 ];
@@ -97,20 +97,20 @@ export const calendario = [
 export const formatos = [
   { nome: "Posts institucionais", desc: "Construção de presença e narrativa de chegada." },
   { nome: "Carrosséis", desc: "Aprofundamento de mensagens institucionais e de oferta." },
-  { nome: "Reels curtos", desc: "Movimento, ritmo e prova visual da operação." },
-  { nome: "Stories", desc: "Bastidores, eventos e relacionamento contínuo." },
-  { nome: "Conteúdo LinkedIn", desc: "Leitura de mercado e conversa com decisores." },
-  { nome: "WhatsApp comercial", desc: "Peças e cards de apoio direto à área comercial." },
+  { nome: "Peças estáticas de feed", desc: "Posts institucionais e comerciais para o feed do Instagram." },
+  { nome: "Edição de reels", desc: "Edição e finalização a partir de gravações brutas fornecidas pelo cliente." },
+  { nome: "WhatsApp comercial", desc: "Peças e cards estáticos de apoio direto à área comercial." },
   { nome: "Folder impresso", desc: "Material físico para o stand da Expo Síndico." },
 ];
 
 export const entregaveis = [
   "Linha narrativa de maio.",
   "Calendário editorial inicial.",
+  "Criação de peças estáticas e carrosséis para o feed do Instagram.",
+  "Edição de reels a partir de gravações fornecidas pelo cliente.",
   "Textos-base para posts e legendas.",
   "Direção visual dos primeiros conteúdos.",
-  "Templates de apoio para o ciclo.",
-  "Materiais comerciais de apresentação.",
+  "Materiais comerciais estáticos de apresentação (incluindo WhatsApp).",
   "Folder institucional/comercial para a Expo Síndico — material impresso voltado a síndicos e administradores prediais, com foco em apresentar a Focus Media, contextualizar a oportunidade de mídia em condomínios e ambientes estratégicos, e apoiar a abordagem comercial no stand.",
 ];
 

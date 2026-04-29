@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Focus Media Brasil — Planejamento de Maio
 
-TODO: Document your project here
+Apresentação digital do planejamento inicial de comunicação da Focus Media Brasil para o ciclo de maio. Desenvolvido pela Marqo.

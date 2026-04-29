@@ -121,6 +121,5 @@ export const aValidar = [
   "Diferenciais comerciais a destacar frente à concorrência local.",
   "Conteúdo institucional e comercial do folder da Expo Síndico.",
   "Dados de operação no Brasil: praças, telas, formatos e cases iniciais.",
-  "Diretrizes de uso de marca, identidade visual e ativos institucionais.",
   "Tom predominante do ciclo: institucional, comercial ou educativo.",
 ];

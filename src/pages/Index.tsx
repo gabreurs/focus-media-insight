@@ -624,8 +624,9 @@ const ValidarSlide = ({ index, total }: { index: number; total: number }) => {
       </motion.h2>
 
       <p className="text-caption text-sm max-w-xl mt-5">
-        Definições institucionais e operacionais necessárias para garantir
-        precisão, consistência e fidelidade de marca ao longo do ciclo.
+        Definições institucionais e operacionais necessárias para sustentar
+        a comunicação do ciclo com precisão e consistência. A identidade visual
+        e os ativos de marca da Focus Media Brasil já estão desenvolvidos pela Marqo.
       </p>
 
       <div className="mt-10 md:mt-12 grid md:grid-cols-2 gap-x-10 gap-y-0 max-w-6xl">
@@ -691,9 +692,10 @@ const AlinhamentoSlide = ({ index, total }: { index: number; total: number }) =>
             className="mt-10 max-w-xl space-y-5"
           >
             <p className="text-foreground/65 leading-relaxed text-[0.95rem]">
-              Após a validação institucional, a Studio Marqo dá sequência ao ciclo —
-              desdobrando o plano em textos finais, direção visual, peças digitais,
-              materiais comerciais e o folder da Expo Síndico.
+              Após a validação institucional, a Marqo dá sequência ao ciclo —
+              desdobrando o plano em textos finais, peças digitais, materiais
+              comerciais e o folder da Expo Síndico, sempre dentro da identidade
+              visual já consolidada da Focus Media Brasil.
             </p>
             <p className="text-foreground/65 leading-relaxed text-[0.95rem]">
               A produção segue o cronograma previsto para maio, com revisões pontuais
@@ -772,7 +774,7 @@ const ClosingSlide = ({ total }: { total: number }) => {
 
         <motion.img
           src={marqoLogo}
-          alt="Studio Marqo"
+          alt="Marqo"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
@@ -836,7 +838,7 @@ const ClosingSlide = ({ total }: { total: number }) => {
             className="font-display-light text-off-white"
             style={{ fontSize: "clamp(0.95rem, 1.1vw, 1.05rem)", letterSpacing: "-0.01em" }}
           >
-            Conheça a Studio Marqo
+            Conheça a Marqo
           </span>
           <span className="h-px w-6 bg-off-white/40 group-hover:w-10 group-hover:bg-off-white transition-all duration-500" />
           <span className="font-editorial text-caption">studiomarqo.com.br</span>

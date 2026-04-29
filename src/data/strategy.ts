@@ -14,32 +14,38 @@ export const fioNarrativo = [
   {
     n: "01",
     etapa: "Chegada",
-    texto: "Anunciar, com presença e clareza, que a Focus Media chegou ao Brasil.",
+    texto:
+      "Marcar de forma institucional o início da operação da Focus Media no Brasil.",
   },
   {
     n: "02",
     etapa: "Apresentação",
-    texto: "Apresentar quem é a Focus Media, com sobriedade e sem autopromoção vazia.",
+    texto:
+      "Posicionar a Focus Media como referência global em mídia DOOH em edifícios.",
   },
   {
     n: "03",
     etapa: "Relevância",
-    texto: "Reforçar a força da operação e da presença em ambientes estratégicos.",
+    texto:
+      "Sustentar autoridade com dados globais: +700M de impactos, +15 países, +340 cidades.",
   },
   {
     n: "04",
     etapa: "Oferta",
-    texto: "Apresentar o que a Focus passa a oferecer no mercado brasileiro.",
+    texto:
+      "Apresentar ao mercado brasileiro o portfólio de mídia em condomínios e ambientes corporativos.",
   },
   {
     n: "05",
     etapa: "Relacionamento",
-    texto: "Abrir conversa com marcas, empresas, síndicos, administradoras e parceiros.",
+    texto:
+      "Ativar diálogo segmentado com marcas, agências, síndicos e administradoras.",
   },
   {
     n: "06",
     etapa: "Presença e prova",
-    texto: "Reforçar autoridade através de operação, eventos e materiais de apoio.",
+    texto:
+      "Consolidar presença com participação na Expo Síndico e materiais comerciais de apoio.",
   },
 ];
 
@@ -109,12 +115,12 @@ export const entregaveis = [
 ];
 
 export const aValidar = [
-  "Frase institucional oficial para apresentar a Focus no Brasil.",
-  "Descrição oficial da operação internacional/global a ser preservada.",
-  "Serviços ou soluções com prioridade neste primeiro mês.",
-  "Diferenciais comerciais que a Lu considera indispensáveis no ciclo.",
-  "Informações que podem entrar no folder da Expo Síndico.",
-  "Clientes, números, praças, telas, formatos ou ativos mencionáveis.",
-  "Restrições de uso de marca, dados, fotos ou nomes.",
-  "Tom predominante deste primeiro ciclo: institucional, comercial ou educativo.",
+  "Frase institucional oficial para apresentar a Focus Media Brasil.",
+  "Descrição oficial da operação global a ser preservada na comunicação.",
+  "Serviços e soluções prioritários para o primeiro ciclo de mercado.",
+  "Diferenciais comerciais a destacar frente à concorrência local.",
+  "Conteúdo institucional e comercial do folder da Expo Síndico.",
+  "Dados de operação no Brasil: praças, telas, formatos e cases iniciais.",
+  "Diretrizes de uso de marca, identidade visual e ativos institucionais.",
+  "Tom predominante do ciclo: institucional, comercial ou educativo.",
 ];

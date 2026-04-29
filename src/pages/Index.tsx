@@ -226,10 +226,9 @@ const HeroSlide = () => {
             className="text-caption max-w-md leading-relaxed"
             style={{ fontSize: isDesktop ? "clamp(0.8rem, 1.1vw, 1rem)" : "0.98rem" }}
           >
-            Linha narrativa, conteúdos e materiais de apoio para o primeiro ciclo de
-            chegada da Focus Media ao Brasil. Estruturado para organizar o ciclo de maio
-            respeitando a visão interna da marca, e servir como base para afinarmos junto
-            à Lu e à equipe.
+            Plano estratégico de comunicação para o primeiro ciclo de operação da
+            Focus Media no Brasil. Define linha narrativa, calendário editorial,
+            formatos e entregáveis para o mês de maio.
           </p>
         </motion.div>
       </div>
@@ -430,8 +429,7 @@ const CalendarioSlide = ({ index, total }: { index: number; total: number }) => 
       </motion.h2>
 
       <p className="text-caption text-sm max-w-xl mt-5">
-        Sugestão inicial de organização narrativa e de produção, aberta a ajustes em conjunto
-        com a equipe interna.
+        Distribuição editorial e comercial do mês, organizada por foco semanal e ritmo de produção.
       </p>
 
       <div className="mt-8 md:mt-12 flex flex-col">
@@ -620,14 +618,14 @@ const ValidarSlide = ({ index, total }: { index: number; total: number }) => {
           lineHeight: 0.98,
         }}
       >
-        Pontos para alinharmos
+        Pontos de alinhamento
         <br />
-        <span className="text-mineral">junto à Focus.</span>
+        <span className="text-mineral">com a Focus Media.</span>
       </motion.h2>
 
       <p className="text-caption text-sm max-w-xl mt-5">
-        Itens que precisamos receber ou validar com a Lu e a equipe interna para garantir
-        precisão, consistência e fidelidade institucional ao ciclo.
+        Definições institucionais e operacionais necessárias para garantir
+        precisão, consistência e fidelidade de marca ao longo do ciclo.
       </p>
 
       <div className="mt-10 md:mt-12 grid md:grid-cols-2 gap-x-10 gap-y-0 max-w-6xl">
@@ -693,13 +691,13 @@ const AlinhamentoSlide = ({ index, total }: { index: number; total: number }) =>
             className="mt-10 max-w-xl space-y-5"
           >
             <p className="text-foreground/65 leading-relaxed text-[0.95rem]">
-              Com a validação da Focus e da Lu, a Studio Marqo dá sequência ao ciclo,
-              desdobrando essa estrutura em textos finais, direção visual, peças, materiais
-              comerciais e o folder da Expo Síndico.
+              Após a validação institucional, a Studio Marqo dá sequência ao ciclo —
+              desdobrando o plano em textos finais, direção visual, peças digitais,
+              materiais comerciais e o folder da Expo Síndico.
             </p>
             <p className="text-foreground/65 leading-relaxed text-[0.95rem]">
-              Seguimos abertos a ajustes e refinamentos antes da produção, para que tudo
-              reflita com fidelidade a chegada da Focus Media ao Brasil.
+              A produção segue o cronograma previsto para maio, com revisões pontuais
+              alinhadas ao posicionamento da Focus Media no mercado brasileiro.
             </p>
           </motion.div>
         </div>
@@ -823,6 +821,26 @@ const ClosingSlide = ({ total }: { total: number }) => {
           <span className="w-6 h-px bg-off-white/20" />
           <span>Maio 2026</span>
         </motion.div>
+
+        <motion.a
+          href="https://studiomarqo.com.br/"
+          target="_blank"
+          rel="noopener noreferrer"
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+          viewport={{ once: true }}
+          className="group mt-10 sm:mt-12 inline-flex items-center gap-4 border border-off-white/25 px-6 py-3.5 sm:px-8 sm:py-4 hover:border-off-white/70 hover:bg-off-white/[0.03] transition-all duration-500"
+        >
+          <span
+            className="font-display-light text-off-white"
+            style={{ fontSize: "clamp(0.95rem, 1.1vw, 1.05rem)", letterSpacing: "-0.01em" }}
+          >
+            Conheça a Studio Marqo
+          </span>
+          <span className="h-px w-6 bg-off-white/40 group-hover:w-10 group-hover:bg-off-white transition-all duration-500" />
+          <span className="font-editorial text-caption">studiomarqo.com.br</span>
+        </motion.a>
       </div>
     </div>
   );

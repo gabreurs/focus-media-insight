@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { ChevronDown, Calendar as CalendarIcon } from "lucide-react";
 import SlideShell, { SlideMeta } from "@/components/focus/SlideShell";
 import SlideNav from "@/components/focus/SlideNav";
 import {
   slides,
-  fioNarrativo,
-  calendario,
-  formatos,
-  entregaveis,
-  aValidar,
+  heroMetrics,
+  maioConcluido,
+  junhoEmExecucao,
+  pillars,
+  seasonalSelected,
+  seasonalExcluded,
+  publications,
+  WEEKS,
+  type Publication,
 } from "@/data/strategy";
 import marqoLogo from "@/assets/marqo-logo.svg";
 
@@ -34,26 +39,14 @@ const useIsDesktop = () => {
 /* Shared atoms                                                  */
 /* ============================================================ */
 
-const SplitText = ({
-  text,
-  delay = 0,
-  className = "",
-}: {
-  text: string;
-  delay?: number;
-  className?: string;
-}) => (
+const SplitText = ({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) => (
   <span className={`inline-block ${className}`}>
     {text.split("").map((char, i) => (
       <motion.span
         key={i}
         initial={{ opacity: 0, y: 60, rotateX: -80 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
-        transition={{
-          duration: 0.9,
-          delay: delay + i * 0.022,
-          ease: [0.22, 1, 0.36, 1],
-        }}
+        transition={{ duration: 0.9, delay: delay + i * 0.022, ease: [0.22, 1, 0.36, 1] }}
         className="inline-block"
         style={{ transformOrigin: "bottom" }}
       >
@@ -63,44 +56,7 @@ const SplitText = ({
   </span>
 );
 
-const Field = ({
-  label,
-  content,
-  delay = 0,
-}: {
-  label: string;
-  content: string;
-  delay?: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-    viewport={{ once: true, amount: 0.2 }}
-    className="group"
-  >
-    <div className="flex items-center gap-3 mb-2">
-      <span className="block w-3 h-px bg-off-white/40 md:group-hover:w-6 md:group-hover:bg-off-white transition-all duration-500" />
-      <p className="font-editorial text-caption">{label}</p>
-    </div>
-    <p
-      className="text-foreground/65 leading-relaxed pl-6"
-      style={{ fontSize: "clamp(0.875rem, 1.05vw, 0.95rem)" }}
-    >
-      {content}
-    </p>
-  </motion.div>
-);
-
-const TopMeta = ({
-  index,
-  total,
-  label,
-}: {
-  index: number;
-  total: number;
-  label: string;
-}) => (
+const TopMeta = ({ index, total, label }: { index: number; total: number; label: string }) => (
   <motion.div
     initial={{ opacity: 0, y: -6 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -116,8 +72,59 @@ const TopMeta = ({
   </motion.div>
 );
 
+const SectionTitle = ({ children, accent }: { children: React.ReactNode; accent?: React.ReactNode }) => {
+  const isDesktop = useIsDesktop();
+  return (
+    <motion.h2
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, amount: 0.3 }}
+      className="font-display-light text-off-white max-w-5xl"
+      style={{
+        fontSize: isDesktop ? "clamp(2rem, min(5.5vw, 8svh), 4.5rem)" : "clamp(1.75rem, 8vw, 2.5rem)",
+        lineHeight: 0.98,
+      }}
+    >
+      {children}
+      {accent ? <><br /><span className="text-mineral">{accent}</span></> : null}
+    </motion.h2>
+  );
+};
+
 /* ============================================================ */
-/* 01 — Abertura (HERO)                                          */
+/* Editorial slide wrapper                                       */
+/* ============================================================ */
+
+const ContentSlide = ({
+  index, total, label, children, scrollable = false,
+}: {
+  index: number; total: number; label: string;
+  children: React.ReactNode; scrollable?: boolean;
+}) => {
+  const isDesktop = useIsDesktop();
+  return (
+    <div
+      className="relative flex w-full min-h-[100svh] flex-col px-5 pt-20 pb-40 sm:px-8 md:h-full md:px-12 md:pt-24 md:pb-24 lg:px-20 xl:px-28"
+      style={!isDesktop ? { paddingBottom: "max(10rem, calc(8.5rem + env(safe-area-inset-bottom)))" } : undefined}
+    >
+      <TopMeta index={index} total={total} label={label} />
+      <div
+        className={`relative z-10 flex-1 min-h-0 flex flex-col ${
+          scrollable
+            ? "overflow-y-auto md:overflow-y-auto md:[scrollbar-width:thin] pr-1"
+            : "justify-center md:overflow-hidden"
+        }`}
+        style={scrollable ? { scrollbarWidth: "thin" } : undefined}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================ */
+/* 01 — Hero                                                     */
 /* ============================================================ */
 
 const HeroSlide = () => {
@@ -142,12 +149,12 @@ const HeroSlide = () => {
     return () => window.removeEventListener("mousemove", onMove);
   }, [isDesktop, mouseX, mouseY]);
 
-  const headlineSize = "clamp(2.25rem, min(10vw, 13svh), 9rem)";
+  const headlineSize = "clamp(2.25rem, min(9.5vw, 12svh), 8rem)";
 
   return (
     <div
       ref={ref}
-      className="relative flex w-full min-h-[100svh] flex-col justify-start gap-8 px-5 pt-12 pb-36 sm:px-8 sm:pt-16 sm:pb-40 md:h-full md:justify-between md:gap-16 md:px-12 md:py-24 lg:px-20 xl:px-28"
+      className="relative flex w-full min-h-[100svh] flex-col justify-start gap-8 px-5 pt-12 pb-36 sm:px-8 sm:pt-16 sm:pb-40 md:h-full md:justify-between md:gap-12 md:px-12 md:py-20 lg:px-20 xl:px-28"
     >
       {isDesktop ? (
         <motion.div className="absolute inset-0 pointer-events-none" style={{ x: bgX, y: bgY }}>
@@ -173,10 +180,8 @@ const HeroSlide = () => {
         transition={{ duration: 1, delay: 0.6 }}
         className="relative z-10 flex justify-between items-center gap-3"
       >
-        <span className="font-editorial text-caption">Planejamento inicial</span>
-        <span className="font-editorial text-caption hidden sm:block">
-          Focus Media Brasil · Maio 2026
-        </span>
+        <span className="font-editorial text-caption">Marqo para Focus Media Brasil</span>
+        <span className="font-editorial text-caption hidden sm:block">Ciclo 02 · Junho 2026</span>
       </motion.div>
 
       <div className="relative z-10 max-w-6xl">
@@ -184,29 +189,29 @@ const HeroSlide = () => {
           <h1
             className="font-display-light text-off-white"
             style={{
-              fontSize: isDesktop ? headlineSize : "clamp(2rem, 13vw, 3.5rem)",
+              fontSize: isDesktop ? headlineSize : "clamp(2rem, 12vw, 3.25rem)",
               lineHeight: 0.92,
             }}
           >
-            {isDesktop ? <SplitText text="Uma chegada" delay={0.7} /> : "Uma chegada"}
+            {isDesktop ? <SplitText text="Calendário" delay={0.7} /> : "Calendário"}
           </h1>
           <h1
             className="font-display-light text-off-white"
             style={{
-              fontSize: isDesktop ? headlineSize : "clamp(2rem, 13vw, 3.5rem)",
+              fontSize: isDesktop ? headlineSize : "clamp(2rem, 12vw, 3.25rem)",
               lineHeight: 0.92,
             }}
           >
-            {isDesktop ? <SplitText text="não se anuncia." delay={0.95} /> : "não se anuncia."}
+            {isDesktop ? <SplitText text="Editorial" delay={0.95} /> : "Editorial"}
           </h1>
           <h1
             className="font-display-light text-mineral"
             style={{
-              fontSize: isDesktop ? headlineSize : "clamp(2rem, 13vw, 3.5rem)",
+              fontSize: isDesktop ? headlineSize : "clamp(2rem, 12vw, 3.25rem)",
               lineHeight: 0.92,
             }}
           >
-            {isDesktop ? <SplitText text="Constrói presença." delay={1.25} /> : "Constrói presença."}
+            {isDesktop ? <SplitText text="Junho 2026." delay={1.25} /> : "Junho 2026."}
           </h1>
         </div>
 
@@ -214,7 +219,7 @@ const HeroSlide = () => {
           initial={{ opacity: 0, y: isDesktop ? 0 : 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: isDesktop ? 1 : 0.45, delay: isDesktop ? 2 : 0.12 }}
-          className="mt-6 flex items-start gap-4 sm:mt-12 sm:gap-6 md:mt-16 md:gap-8"
+          className="mt-6 flex items-start gap-4 sm:mt-10 sm:gap-6 md:mt-12 md:gap-8"
         >
           <motion.div
             initial={{ scaleX: 0 }}
@@ -223,374 +228,491 @@ const HeroSlide = () => {
             className="h-px bg-mineral/40 w-12 mt-3 hidden md:block origin-left flex-shrink-0"
           />
           <p
-            className="text-caption max-w-md leading-relaxed"
-            style={{ fontSize: isDesktop ? "clamp(0.8rem, 1.1vw, 1rem)" : "0.98rem" }}
+            className="text-caption max-w-xl leading-relaxed"
+            style={{ fontSize: isDesktop ? "clamp(0.85rem, 1.1vw, 1rem)" : "0.98rem" }}
           >
-            Plano estratégico de comunicação para o primeiro ciclo de operação da
-            Focus Media no Brasil. Define linha narrativa, calendário editorial,
-            formatos e entregáveis para o mês de maio.
+            Junho traduz a presença da Focus Media em conteúdo recorrente e
+            publicável — calendário completo para aprovação e execução, com copy
+            finalizado para edifícios, marcas e a rotina urbana.
           </p>
         </motion.div>
       </div>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: isDesktop ? 2.4 : 1.3 }}
-        className="relative z-10 mt-auto flex items-end justify-between gap-3 pb-1"
+        className="relative z-10 mt-auto grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 md:gap-x-10 border-t border-border/60 pt-6 md:pt-8"
       >
-        <span className="font-editorial text-caption">
-          {isDesktop ? "Role ou use as setas" : "Deslize ou avance"}
-        </span>
-        <span className="font-editorial text-caption hidden sm:block">09 telas</span>
+        {heroMetrics.map((m, i) => (
+          <motion.div
+            key={m.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: (isDesktop ? 2.5 : 1.4) + i * 0.07 }}
+            className="flex flex-col"
+          >
+            <span
+              className="font-display-light text-off-white tabular-nums"
+              style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", letterSpacing: "-0.04em", lineHeight: 1 }}
+            >
+              {m.value}
+            </span>
+            <span className="font-editorial text-caption mt-2">{m.label}</span>
+          </motion.div>
+        ))}
       </motion.div>
     </div>
   );
 };
 
 /* ============================================================ */
-/* Editorial slide wrapper (for content slides)                  */
+/* 02 — Transição Maio → Junho                                   */
 /* ============================================================ */
 
-const ContentSlide = ({
-  index,
-  total,
-  label,
-  children,
-}: {
-  index: number;
-  total: number;
-  label: string;
-  children: React.ReactNode;
-}) => {
+const TransicaoSlide = ({ index, total }: { index: number; total: number }) => {
   const isDesktop = useIsDesktop();
   return (
-    <div
-      className="relative flex w-full min-h-[100svh] flex-col px-5 pt-20 pb-40 sm:px-8 md:h-full md:overflow-hidden md:px-12 md:pt-24 md:pb-24 lg:px-20 xl:px-28"
-      style={
-        !isDesktop
-          ? { paddingBottom: "max(10rem, calc(8.5rem + env(safe-area-inset-bottom)))" }
-          : undefined
-      }
-    >
-      <TopMeta index={index} total={total} label={label} />
-      <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center">{children}</div>
-    </div>
-  );
-};
-
-/* ============================================================ */
-/* 02 — Direção narrativa                                         */
-/* ============================================================ */
-
-const DirecaoSlide = ({ index, total }: { index: number; total: number }) => {
-  const isDesktop = useIsDesktop();
-  const headlineSize = isDesktop
-    ? "clamp(2rem, min(7vw, 10svh), 6rem)"
-    : "clamp(1.85rem, 8.5vw, 2.85rem)";
-  return (
-    <ContentSlide index={index} total={total} label="Direção narrativa">
+    <ContentSlide index={index} total={total} label="Maio → Junho">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 right-0 translate-x-1/3 h-[55vw] w-[55vw] max-h-[640px] max-w-[640px] rounded-full bg-mineral/[0.04] blur-[140px]" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-        <div className="lg:col-span-7 min-w-0">
-          <motion.h2
-            initial={{ opacity: 0, y: 30, letterSpacing: "0.06em" }}
-            whileInView={{ opacity: 1, y: 0, letterSpacing: "-0.04em" }}
-            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true, amount: 0.3 }}
-            style={{ fontSize: headlineSize, lineHeight: 0.95 }}
-            className="font-display-light text-off-white"
+      <SectionTitle accent="é continuidade.">
+        Junho não é recomeço,
+      </SectionTitle>
+
+      <p className="text-caption text-sm max-w-2xl mt-5 md:mt-6">
+        O ciclo de maio entregou apresentação e contexto. Junho desdobra essa
+        chegada em conteúdo publicável, recorrente e operacional.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-10 md:mt-14 max-w-5xl">
+        {/* Maio — concluído */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, amount: 0.3 }}
+          className="border-t border-border/60 pt-6"
+        >
+          <div className="flex items-baseline justify-between mb-5">
+            <span className="font-editorial text-caption">Maio 2026 — concluído</span>
+            <span className="block w-6 h-px bg-caption/40" />
+          </div>
+          <ul className="space-y-3">
+            {maioConcluido.map((it) => (
+              <li key={it} className="flex gap-3 text-foreground/50 text-sm leading-relaxed">
+                <span className="mt-2.5 w-2 h-px bg-caption/40 shrink-0" />
+                <span className="line-through decoration-caption/30">{it}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+
+        {/* Junho — em execução */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, amount: 0.3 }}
+          className="border-t border-off-white/40 pt-6"
+        >
+          <div className="flex items-baseline justify-between mb-5">
+            <span className="font-editorial text-off-white">Junho 2026 — em execução</span>
+            <span className="block w-6 h-px bg-off-white/60" />
+          </div>
+          <ul className="space-y-3">
+            {junhoEmExecucao.map((it) => (
+              <li key={it} className="flex gap-3 text-foreground/85 text-sm md:text-[0.95rem] leading-relaxed">
+                <span className="mt-2.5 w-2 h-px bg-off-white/60 shrink-0" />
+                <span>{it}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      </div>
+    </ContentSlide>
+  );
+};
+
+/* ============================================================ */
+/* 03 — Pilares editoriais                                       */
+/* ============================================================ */
+
+const PilaresSlide = ({ index, total }: { index: number; total: number }) => (
+  <ContentSlide index={index} total={total} label="Pilares editoriais" scrollable>
+    <SectionTitle accent="que estruturam o mês.">Seis pilares</SectionTitle>
+
+    <p className="text-caption text-sm max-w-xl mt-5">
+      Cada publicação de junho está ancorada em um pilar editorial — definindo
+      audiência, tom e o tipo de conversa que estabelece.
+    </p>
+
+    <div className="mt-8 md:mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 max-w-7xl pb-8">
+      {pillars.map((p, i) => (
+        <motion.div
+          key={p.name}
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, delay: 0.05 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, amount: 0.15 }}
+          className="border-t border-border/60 pt-5"
+        >
+          <div className="flex items-baseline justify-between mb-3">
+            <span className="font-editorial text-caption">Pilar 0{i + 1}</span>
+            <span className="block w-6 h-px bg-off-white/30" />
+          </div>
+          <h3
+            className="font-display-light text-off-white mb-3"
+            style={{ fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)", letterSpacing: "-0.03em", lineHeight: 1.1 }}
           >
-            A mensagem central
-            <br />
-            <span className="text-mineral">é a chegada.</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true, amount: 0.3 }}
-            className="text-foreground/65 leading-relaxed mt-8 md:mt-10 max-w-xl"
-            style={{ fontSize: "clamp(0.95rem, 1.1vw, 1.05rem)" }}
+            {p.name}
+          </h3>
+          <p className="text-foreground/70 leading-relaxed text-sm mb-4">{p.purpose}</p>
+          <p className="font-editorial text-caption mb-2">Audiência</p>
+          <p className="text-foreground/60 text-sm mb-4">{p.audience}</p>
+          <p className="font-editorial text-caption mb-2">Exemplos em Junho</p>
+          <ul className="space-y-1.5">
+            {p.examples.map((ex) => (
+              <li key={ex} className="flex gap-2 text-foreground/65 text-sm leading-relaxed">
+                <span className="mt-2 w-1.5 h-px bg-off-white/40 shrink-0" />
+                <span>{ex}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      ))}
+    </div>
+  </ContentSlide>
+);
+
+/* ============================================================ */
+/* 04 — Datas sazonais                                           */
+/* ============================================================ */
+
+const SazonaisSlide = ({ index, total }: { index: number; total: number }) => (
+  <ContentSlide index={index} total={total} label="Oportunidades sazonais" scrollable>
+    <SectionTitle accent="o que ficou de fora.">
+      Filtragem editorial:
+    </SectionTitle>
+
+    <p className="text-caption text-sm max-w-2xl mt-5">
+      Nem toda data do calendário gera conteúdo relevante. Junho passou por
+      curadoria — só permaneceram datas com vínculo natural à Focus Media.
+    </p>
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 mt-10 md:mt-12 pb-8 max-w-7xl">
+      {/* Selecionadas */}
+      <div>
+        <div className="flex items-baseline justify-between mb-4">
+          <span className="font-editorial text-off-white">Datas selecionadas — 08</span>
+          <span className="block w-6 h-px bg-off-white/60" />
+        </div>
+        <ul>
+          {seasonalSelected.map((d, i) => (
+            <motion.li
+              key={d.date}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.04 }}
+              viewport={{ once: true, amount: 0.2 }}
+              className="border-t border-border/60 py-4 grid grid-cols-12 gap-3"
+            >
+              <div className="col-span-3 md:col-span-2">
+                <div className="font-display-light text-off-white tabular-nums text-base md:text-lg">{d.date}</div>
+                <div className="font-editorial text-caption">{d.weekday}</div>
+              </div>
+              <div className="col-span-9 md:col-span-10">
+                <div className="text-foreground/85 text-sm md:text-[0.95rem] mb-1">{d.occasion}</div>
+                <p className="text-caption text-xs md:text-sm leading-relaxed">{d.reason}</p>
+              </div>
+            </motion.li>
+          ))}
+          <div className="border-t border-border/60" />
+        </ul>
+      </div>
+
+      {/* Não priorizadas */}
+      <div>
+        <div className="flex items-baseline justify-between mb-4">
+          <span className="font-editorial text-caption">Avaliadas e não priorizadas — 06</span>
+          <span className="block w-6 h-px bg-caption/40" />
+        </div>
+        <ul>
+          {seasonalExcluded.map((d, i) => (
+            <motion.li
+              key={d.date}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.04 }}
+              viewport={{ once: true, amount: 0.2 }}
+              className="border-t border-border/40 py-4 grid grid-cols-12 gap-3 opacity-55"
+            >
+              <div className="col-span-3 md:col-span-2">
+                <div className="font-display-light text-foreground/70 tabular-nums text-base md:text-lg">{d.date}</div>
+              </div>
+              <div className="col-span-9 md:col-span-10">
+                <div className="text-foreground/70 text-sm mb-1">{d.occasion}</div>
+                <p className="text-caption text-xs md:text-sm leading-relaxed">{d.reason}</p>
+              </div>
+            </motion.li>
+          ))}
+          <div className="border-t border-border/40" />
+        </ul>
+      </div>
+    </div>
+  </ContentSlide>
+);
+
+/* ============================================================ */
+/* Card de publicação                                            */
+/* ============================================================ */
+
+const formatBadgeClass = "font-editorial text-caption border border-border/70 px-2.5 py-1";
+const audienceBadgeClass = "font-editorial text-off-white/80 border border-off-white/30 px-2.5 py-1";
+const pillarBadgeClass = "font-editorial text-mineral border border-mineral/40 px-2.5 py-1";
+
+const PublicationCard = ({ pub }: { pub: Publication }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, amount: 0.15 }}
+      className="border border-border/60 bg-card/30 backdrop-blur-sm"
+    >
+      {/* Header (always visible) */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="w-full text-left p-5 md:p-7 group"
+      >
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex items-baseline gap-4">
+            <span
+              className="font-display-light text-mineral tabular-nums"
+              style={{ fontSize: "clamp(1.5rem, 2.2vw, 2rem)", letterSpacing: "-0.04em" }}
+            >
+              #{String(pub.id).padStart(2, "0")}
+            </span>
+            <div>
+              <div className="font-editorial text-off-white/80 tabular-nums">{pub.date}</div>
+              <div className="font-editorial text-caption">{pub.weekday}</div>
+            </div>
+          </div>
+          <motion.div
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="border border-border/70 w-9 h-9 flex items-center justify-center group-hover:border-off-white/50 transition-colors"
           >
-            A comunicação de maio constrói uma narrativa coerente de presença, apresentação,
-            relevância e oferta. Cada peça soma a um movimento maior, conduzindo o público da
-            novidade da chegada até a compreensão do que a Focus passa a oferecer no mercado
-            brasileiro.
-          </motion.p>
+            <ChevronDown className="w-4 h-4 text-off-white/70" strokeWidth={1.25} />
+          </motion.div>
         </div>
 
-        <div className="lg:col-span-5 lg:pt-4 lg:border-l lg:border-border/40 lg:pl-10 space-y-6">
-          {["Chegada", "Presença", "Apresentação", "Relevância", "Oferta", "Relacionamento"].map(
-            (w, i) => (
-              <motion.div
-                key={w}
-                initial={{ opacity: 0, x: 12 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.15 + i * 0.06 }}
-                viewport={{ once: true, amount: 0.3 }}
-                className="flex items-baseline gap-4"
-              >
-                <span className="font-editorial text-caption tabular-nums w-6">
-                  0{i + 1}
-                </span>
-                <span
-                  className="font-display-light text-off-white"
-                  style={{ fontSize: "clamp(1.1rem, 1.6vw, 1.4rem)", letterSpacing: "-0.02em" }}
-                >
-                  {w}
-                </span>
-              </motion.div>
-            )
+        <h3
+          className="font-display-light text-off-white mb-3"
+          style={{ fontSize: "clamp(1.25rem, 1.9vw, 1.6rem)", letterSpacing: "-0.03em", lineHeight: 1.15 }}
+        >
+          {pub.hook}
+        </h3>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className={pillarBadgeClass}>{pub.pillar}</span>
+          <span className={formatBadgeClass}>{pub.format}</span>
+          <span className={audienceBadgeClass}>{pub.audience}</span>
+          {pub.seasonal && (
+            <span className="font-editorial text-mineral border border-mineral/60 bg-mineral/[0.05] px-2.5 py-1 inline-flex items-center gap-1.5">
+              <CalendarIcon className="w-3 h-3" strokeWidth={1.5} />
+              Sazonal
+            </span>
           )}
         </div>
-      </div>
-    </ContentSlide>
-  );
-};
 
-/* ============================================================ */
-/* 03 — Fio narrativo                                             */
-/* ============================================================ */
+        <p className="text-foreground/70 text-sm leading-relaxed">{pub.objective}</p>
+        {pub.seasonalNote && (
+          <p className="font-editorial text-caption mt-3">{pub.seasonalNote}</p>
+        )}
+      </button>
 
-const FioSlide = ({ index, total }: { index: number; total: number }) => {
-  const isDesktop = useIsDesktop();
-  return (
-    <ContentSlide index={index} total={total} label="Fio narrativo">
-      <motion.h2
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        viewport={{ once: true, amount: 0.3 }}
-        className="font-display-light text-off-white max-w-4xl"
-        style={{
-          fontSize: isDesktop ? "clamp(2rem, min(5.5vw, 8svh), 4.5rem)" : "clamp(1.75rem, 8vw, 2.5rem)",
-          lineHeight: 0.98,
-        }}
-      >
-        Seis movimentos
-        <br />
-        <span className="text-mineral">para construir presença.</span>
-      </motion.h2>
-
-      <div className="mt-10 md:mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8 max-w-6xl">
-        {fioNarrativo.map((item, i) => (
+      <AnimatePresence initial={false}>
+        {open && (
           <motion.div
-            key={item.n}
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true, amount: 0.2 }}
-            className="border-t border-border/60 pt-5"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden border-t border-border/60"
           >
-            <div className="flex items-baseline justify-between mb-3">
-              <span className="font-editorial text-caption">Etapa {item.n}</span>
-              <span className="block w-6 h-px bg-off-white/30" />
+            <div className="p-5 md:p-7 space-y-7">
+              {/* Conceito visual (static / carousel) */}
+              {pub.content.kind !== "reels" && (
+                <div>
+                  <div className="font-editorial text-caption mb-2">Conceito visual</div>
+                  <p className="text-foreground/75 text-sm leading-relaxed">{pub.content.visual}</p>
+                </div>
+              )}
+
+              {/* Conteúdo específico */}
+              {pub.content.kind === "static" && (
+                <>
+                  <div>
+                    <div className="font-editorial text-caption mb-2">Texto do artwork</div>
+                    <p
+                      className="font-display-light text-off-white whitespace-pre-line"
+                      style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", letterSpacing: "-0.02em", lineHeight: 1.2 }}
+                    >
+                      {pub.content.artwork}
+                    </p>
+                    {pub.content.artworkSupport && (
+                      <p className="text-mineral text-sm mt-3">{pub.content.artworkSupport}</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {pub.content.kind === "carousel" && (
+                <div>
+                  <div className="font-editorial text-caption mb-3">
+                    Slides do carrossel — {pub.content.slides.length}
+                  </div>
+                  <div className="space-y-3">
+                    {pub.content.slides.map((s, i) => (
+                      <div key={i} className="border border-border/50 bg-background/40 p-4">
+                        <div className="font-editorial text-mineral tabular-nums mb-2">
+                          Slide {String(i + 1).padStart(2, "0")} / {String(pub.content.kind === "carousel" ? pub.content.slides.length : 0).padStart(2, "0")}
+                        </div>
+                        <h4
+                          className="font-display-light text-off-white mb-2"
+                          style={{ fontSize: "clamp(1rem, 1.4vw, 1.2rem)", letterSpacing: "-0.02em", lineHeight: 1.2 }}
+                        >
+                          {s.headline}
+                        </h4>
+                        <p className="text-foreground/75 text-sm leading-relaxed">{s.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {pub.content.kind === "reels" && (
+                <>
+                  <div>
+                    <div className="font-editorial text-caption mb-2">Nota de produção</div>
+                    <p className="text-foreground/75 text-sm leading-relaxed">{pub.content.productionNote}</p>
+                  </div>
+                  <div>
+                    <div className="font-editorial text-caption mb-3">Roteiro cena a cena</div>
+                    <div className="space-y-3">
+                      {pub.content.scenes.map((s, i) => (
+                        <div key={i} className="border border-border/50 bg-background/40 p-4">
+                          <div className="font-editorial text-mineral tabular-nums mb-2">
+                            Cena {String(i + 1).padStart(2, "0")} · {s.time}
+                          </div>
+                          <p className="text-foreground/70 text-sm mb-2"><span className="font-editorial text-caption">Visual: </span>{s.visual}</p>
+                          <p className="text-off-white text-sm"><span className="font-editorial text-caption">On-screen: </span>{s.onScreen}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-editorial text-caption mb-2">Dependência de produção</div>
+                    <p className="text-foreground/75 text-sm leading-relaxed">{pub.content.dependency}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Legenda */}
+              <div>
+                <div className="font-editorial text-caption mb-2">Legenda Instagram</div>
+                <p className="text-foreground/85 text-sm leading-relaxed whitespace-pre-line">{pub.content.caption}</p>
+              </div>
+
+              {/* CTA */}
+              <div>
+                <div className="font-editorial text-caption mb-2">CTA</div>
+                <p className="text-off-white text-sm leading-relaxed">{pub.content.cta}</p>
+              </div>
+
+              {/* Hashtags */}
+              <div>
+                <div className="font-editorial text-caption mb-2">Hashtags</div>
+                <div className="flex flex-wrap gap-2">
+                  {pub.content.hashtags.map((h) => (
+                    <span key={h} className="font-editorial text-mineral text-[0.7rem] border border-mineral/30 px-2 py-1">
+                      {h}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-            <h3
-              className="font-display-light text-off-white mb-3"
-              style={{ fontSize: "clamp(1.4rem, 2vw, 1.75rem)", letterSpacing: "-0.03em" }}
-            >
-              {item.etapa}
-            </h3>
-            <p className="text-foreground/65 leading-relaxed text-sm">{item.texto}</p>
           </motion.div>
-        ))}
-      </div>
-    </ContentSlide>
+        )}
+      </AnimatePresence>
+    </motion.article>
   );
 };
 
 /* ============================================================ */
-/* 04 — Calendário                                                */
+/* 05 — Calendário                                               */
 /* ============================================================ */
 
 const CalendarioSlide = ({ index, total }: { index: number; total: number }) => {
-  const isDesktop = useIsDesktop();
-  return (
-    <ContentSlide index={index} total={total} label="Calendário editorial">
-      <motion.h2
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        viewport={{ once: true, amount: 0.3 }}
-        className="font-display-light text-off-white max-w-4xl"
-        style={{
-          fontSize: isDesktop ? "clamp(2rem, min(5.5vw, 8svh), 4.5rem)" : "clamp(1.75rem, 8vw, 2.5rem)",
-          lineHeight: 0.98,
-        }}
-      >
-        Maio organizado em
-        <br />
-        <span className="text-mineral">quatro movimentos.</span>
-      </motion.h2>
+  const [activeWeek, setActiveWeek] = useState<number | "all">("all");
 
-      <p className="text-caption text-sm max-w-xl mt-5">
-        Distribuição editorial e comercial do mês, organizada por foco semanal e ritmo de produção.
+  const filtered = activeWeek === "all"
+    ? publications
+    : publications.filter((p) => p.week === activeWeek);
+
+  const tabs: Array<{ key: number | "all"; label: string; sub?: string }> = [
+    { key: "all", label: "Todas", sub: "14 publicações" },
+    ...WEEKS.map((w) => ({ key: w.number, label: w.label, sub: w.period })),
+  ];
+
+  return (
+    <ContentSlide index={index} total={total} label="Calendário editorial" scrollable>
+      <SectionTitle accent="14 publicações.">
+        Junho em
+      </SectionTitle>
+
+      <p className="text-caption text-sm max-w-2xl mt-5">
+        Cada card abre o conteúdo completo da publicação — texto do artwork,
+        slides, roteiro, legenda, CTA e hashtags. Pronto para aprovação e
+        execução.
       </p>
 
-      <div className="mt-8 md:mt-12 flex flex-col">
-        {calendario.map((s, i) => (
-          <motion.div
-            key={s.semana}
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true, amount: 0.2 }}
-            className="grid grid-cols-12 gap-4 md:gap-8 py-6 border-t border-border/60 group"
-          >
-            <div className="col-span-12 md:col-span-3 flex flex-col gap-1">
-              <span className="font-editorial text-off-white/80">{s.semana}</span>
-              <span className="font-editorial text-caption tabular-nums">{s.periodo}</span>
-            </div>
-            <div className="col-span-12 md:col-span-3">
-              <h3
-                className="font-display-light text-off-white"
-                style={{ fontSize: "clamp(1.25rem, 1.8vw, 1.6rem)", letterSpacing: "-0.03em" }}
-              >
-                {s.foco}
-              </h3>
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <ul className="space-y-2">
-                {s.itens.map((it, j) => (
-                  <li
-                    key={j}
-                    className="flex gap-3 text-foreground/70 text-sm leading-relaxed"
-                  >
-                    <span className="mt-2.5 w-2 h-px bg-off-white/40 shrink-0" />
-                    <span>{it}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </motion.div>
-        ))}
-        <div className="border-t border-border/60" />
+      {/* Tabs por semana */}
+      <div className="mt-8 md:mt-10 flex flex-wrap gap-2 pb-4 border-b border-border/60">
+        {tabs.map((t) => {
+          const active = activeWeek === t.key;
+          return (
+            <button
+              key={String(t.key)}
+              onClick={() => setActiveWeek(t.key)}
+              className={`group border px-3 py-2 transition-colors duration-300 text-left ${
+                active
+                  ? "border-off-white/70 bg-off-white/[0.04]"
+                  : "border-border/60 hover:border-off-white/40"
+              }`}
+            >
+              <div className={`font-editorial ${active ? "text-off-white" : "text-off-white/70"}`}>
+                {t.label}
+              </div>
+              {t.sub && (
+                <div className="font-editorial text-caption text-[0.65rem] mt-0.5">{t.sub}</div>
+              )}
+            </button>
+          );
+        })}
       </div>
-    </ContentSlide>
-  );
-};
 
-/* ============================================================ */
-/* 05 — Formatos                                                  */
-/* ============================================================ */
-
-const FormatosSlide = ({ index, total }: { index: number; total: number }) => {
-  const isDesktop = useIsDesktop();
-  return (
-    <ContentSlide index={index} total={total} label="Formatos sugeridos">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-        <div className="lg:col-span-5">
-          <motion.h2
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true, amount: 0.3 }}
-            className="font-display-light text-off-white"
-            style={{
-              fontSize: isDesktop
-                ? "clamp(2rem, min(5vw, 8svh), 4rem)"
-                : "clamp(1.75rem, 8vw, 2.5rem)",
-              lineHeight: 0.98,
-            }}
-          >
-            Formatos previstos
-            <br />
-            <span className="text-mineral">para o ciclo.</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            viewport={{ once: true, amount: 0.3 }}
-            className="text-foreground/65 leading-relaxed mt-8 max-w-md"
-            style={{ fontSize: "clamp(0.9rem, 1.05vw, 1rem)" }}
-          >
-            Cada formato cumpre um papel específico dentro do fio narrativo do mês,
-            equilibrando presença digital, comercial e impressa.
-          </motion.p>
-        </div>
-
-        <div className="lg:col-span-7">
-          <ul className="flex flex-col">
-            <div className="border-t border-border/60" />
-            {formatos.map((f, i) => (
-              <motion.li
-                key={f.nome}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.05 * i }}
-                viewport={{ once: true, amount: 0.3 }}
-                className="py-5 flex items-baseline gap-6 border-b border-border/60 group"
-              >
-                <span className="font-editorial text-caption tabular-nums w-8">
-                  0{i + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <h3
-                    className="font-display-light text-off-white mb-1 md:group-hover:text-mineral transition-colors duration-500"
-                    style={{ fontSize: "clamp(1.15rem, 1.6vw, 1.45rem)", letterSpacing: "-0.03em" }}
-                  >
-                    {f.nome}
-                  </h3>
-                  <p className="text-sm text-foreground/60">{f.desc}</p>
-                </div>
-              </motion.li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </ContentSlide>
-  );
-};
-
-/* ============================================================ */
-/* 06 — Entregáveis                                               */
-/* ============================================================ */
-
-const EntregaveisSlide = ({ index, total }: { index: number; total: number }) => {
-  const isDesktop = useIsDesktop();
-  return (
-    <ContentSlide index={index} total={total} label="Entregáveis">
-      <motion.h2
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        viewport={{ once: true, amount: 0.3 }}
-        className="font-display-light text-off-white max-w-5xl"
-        style={{
-          fontSize: isDesktop
-            ? "clamp(2rem, min(5.5vw, 8svh), 4.5rem)"
-            : "clamp(1.75rem, 8vw, 2.5rem)",
-          lineHeight: 0.98,
-        }}
-      >
-        O que será entregue
-        <br />
-        <span className="text-mineral">neste primeiro ciclo.</span>
-      </motion.h2>
-
-      <div className="mt-10 md:mt-14 grid md:grid-cols-2 gap-x-12 gap-y-0 max-w-6xl">
-        {entregaveis.map((e, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.04 * i }}
-            viewport={{ once: true, amount: 0.2 }}
-            className="flex gap-5 py-5 border-t border-border/60"
-          >
-            <span className="font-editorial text-caption tabular-nums mt-1">
-              0{i + 1}
-            </span>
-            <p className="text-sm md:text-[0.95rem] text-foreground/80 leading-relaxed flex-1">
-              {e}
-            </p>
-          </motion.div>
+      {/* Cards */}
+      <div className="mt-6 md:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 pb-10 max-w-7xl">
+        {filtered.map((pub) => (
+          <PublicationCard key={pub.id} pub={pub} />
         ))}
       </div>
     </ContentSlide>
@@ -598,136 +720,7 @@ const EntregaveisSlide = ({ index, total }: { index: number; total: number }) =>
 };
 
 /* ============================================================ */
-/* 07 — A validar                                                 */
-/* ============================================================ */
-
-const ValidarSlide = ({ index, total }: { index: number; total: number }) => {
-  const isDesktop = useIsDesktop();
-  return (
-    <ContentSlide index={index} total={total} label="A validar">
-      <motion.h2
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        viewport={{ once: true, amount: 0.3 }}
-        className="font-display-light text-off-white max-w-5xl"
-        style={{
-          fontSize: isDesktop
-            ? "clamp(2rem, min(5vw, 7.5svh), 4rem)"
-            : "clamp(1.75rem, 8vw, 2.5rem)",
-          lineHeight: 0.98,
-        }}
-      >
-        Pontos de alinhamento
-        <br />
-        <span className="text-mineral">com a Focus Media.</span>
-      </motion.h2>
-
-      <p className="text-caption text-sm max-w-xl mt-5">
-        Definições institucionais e operacionais necessárias para sustentar
-        a comunicação do ciclo com precisão e consistência. A identidade visual
-        e os ativos de marca da Focus Media Brasil já estão desenvolvidos pela Marqo.
-      </p>
-
-      <div className="mt-10 md:mt-12 grid md:grid-cols-2 gap-x-10 gap-y-0 max-w-6xl">
-        {aValidar.map((v, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.04 * i }}
-            viewport={{ once: true, amount: 0.2 }}
-            className="flex gap-5 py-4 border-t border-border/60"
-          >
-            <span className="font-editorial text-caption tabular-nums mt-1">
-              0{i + 1}
-            </span>
-            <p className="text-sm text-foreground/80 leading-relaxed flex-1">{v}</p>
-          </motion.div>
-        ))}
-      </div>
-    </ContentSlide>
-  );
-};
-
-/* ============================================================ */
-/* 08 — Próximo alinhamento                                       */
-/* ============================================================ */
-
-const AlinhamentoSlide = ({ index, total }: { index: number; total: number }) => {
-  const isDesktop = useIsDesktop();
-  return (
-    <ContentSlide index={index} total={total} label="Próximo alinhamento">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute bottom-0 right-1/4 h-[55vw] w-[55vw] max-h-[600px] max-w-[600px] rounded-full bg-mineral/[0.04] blur-[140px]" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-        <div className="lg:col-span-8">
-          <motion.h2
-            initial={{ opacity: 0, y: 30, letterSpacing: "0.06em" }}
-            whileInView={{ opacity: 1, y: 0, letterSpacing: "-0.04em" }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true, amount: 0.3 }}
-            className="font-display-light text-off-white"
-            style={{
-              fontSize: isDesktop
-                ? "clamp(2rem, min(6vw, 9svh), 5rem)"
-                : "clamp(1.85rem, 8.5vw, 2.85rem)",
-              lineHeight: 0.96,
-            }}
-          >
-            A partir daqui,
-            <br />
-            transformamos a estrutura
-            <br />
-            <span className="text-mineral">em peças.</span>
-          </motion.h2>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.4 }}
-            viewport={{ once: true, amount: 0.3 }}
-            className="mt-10 max-w-xl space-y-5"
-          >
-            <p className="text-foreground/65 leading-relaxed text-[0.95rem]">
-              Após a validação institucional, a Marqo dá sequência ao ciclo —
-              desdobrando o plano em textos finais, peças digitais, materiais
-              comerciais e o folder da Expo Síndico, sempre dentro da identidade
-              visual já consolidada da Focus Media Brasil.
-            </p>
-            <p className="text-foreground/65 leading-relaxed text-[0.95rem]">
-              A produção segue o cronograma previsto para maio, com revisões pontuais
-              alinhadas ao posicionamento da Focus Media no mercado brasileiro.
-            </p>
-          </motion.div>
-        </div>
-
-        <div className="lg:col-span-4 lg:pt-4 lg:border-l lg:border-border/40 lg:pl-10 space-y-8">
-          <Field
-            label="Período"
-            content="Maio 2026 — Ciclo 01 de comunicação."
-            delay={0.2}
-          />
-          <Field
-            label="Próximos passos"
-            content="Validação da estrutura, ajustes finais e início da produção das peças."
-            delay={0.3}
-          />
-          <Field
-            label="Pontos de atenção"
-            content="Folder Expo Síndico (21/05) — material com prioridade no ciclo."
-            delay={0.4}
-          />
-        </div>
-      </div>
-    </ContentSlide>
-  );
-};
-
-/* ============================================================ */
-/* 09 — Studio Marqo (closing)                                    */
+/* 06 — Closing / Marqo                                          */
 /* ============================================================ */
 
 const ClosingSlide = ({ total }: { total: number }) => {
@@ -735,11 +728,7 @@ const ClosingSlide = ({ total }: { total: number }) => {
   return (
     <div
       className="relative flex w-full min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5 py-20 sm:px-8 md:h-full md:px-12 lg:px-20 xl:px-28"
-      style={
-        !isDesktop
-          ? { paddingBottom: "max(10rem, calc(8.5rem + env(safe-area-inset-bottom)))" }
-          : undefined
-      }
+      style={!isDesktop ? { paddingBottom: "max(10rem, calc(8.5rem + env(safe-area-inset-bottom)))" } : undefined}
     >
       <div className="absolute inset-0 pointer-events-none">
         <div
@@ -769,7 +758,7 @@ const ClosingSlide = ({ total }: { total: number }) => {
           viewport={{ once: true }}
           className="font-editorial text-caption mb-8 sm:mb-10 md:mb-14"
         >
-          Planejamento e apresentação por
+          Planejamento editorial e identidade visual por
         </motion.p>
 
         <motion.img
@@ -790,7 +779,7 @@ const ClosingSlide = ({ total }: { total: number }) => {
           className="font-display-light text-off-white"
           style={{ fontSize: "clamp(2rem, min(7vw, 10svh), 6rem)", lineHeight: 0.95 }}
         >
-          Estrutura entregue.
+          Calendário pronto.
         </motion.h2>
 
         <motion.h2
@@ -801,7 +790,7 @@ const ClosingSlide = ({ total }: { total: number }) => {
           className="font-display-light text-mineral mt-1"
           style={{ fontSize: "clamp(2rem, min(7vw, 10svh), 6rem)", lineHeight: 0.95 }}
         >
-          Pronta para virar marca.
+          Pronto para publicar.
         </motion.h2>
 
         <motion.div
@@ -821,7 +810,7 @@ const ClosingSlide = ({ total }: { total: number }) => {
         >
           <span>Focus Media Brasil</span>
           <span className="w-6 h-px bg-off-white/20" />
-          <span>Maio 2026</span>
+          <span>Junho 2026</span>
         </motion.div>
 
         <motion.a
@@ -857,7 +846,7 @@ const Index = () => {
   const [current, setCurrent] = useState(0);
   const isDesktop = useIsDesktop();
 
-  const total = slides.length; // 9
+  const total = slides.length; // 6
 
   const goTo = useCallback(
     (i: number) => {
@@ -921,7 +910,9 @@ const Index = () => {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
         e.preventDefault();
         goTo(current + 1);
       } else if (e.key === "ArrowUp" || e.key === "PageUp") {
@@ -953,34 +944,22 @@ const Index = () => {
         </SlideShell>
 
         <SlideShell index={1} id={slides[1].id}>
-          <DirecaoSlide index={2} total={total} />
+          <TransicaoSlide index={2} total={total} />
         </SlideShell>
 
         <SlideShell index={2} id={slides[2].id}>
-          <FioSlide index={3} total={total} />
+          <PilaresSlide index={3} total={total} />
         </SlideShell>
 
         <SlideShell index={3} id={slides[3].id}>
-          <CalendarioSlide index={4} total={total} />
+          <SazonaisSlide index={4} total={total} />
         </SlideShell>
 
         <SlideShell index={4} id={slides[4].id}>
-          <FormatosSlide index={5} total={total} />
+          <CalendarioSlide index={5} total={total} />
         </SlideShell>
 
         <SlideShell index={5} id={slides[5].id}>
-          <EntregaveisSlide index={6} total={total} />
-        </SlideShell>
-
-        <SlideShell index={6} id={slides[6].id}>
-          <ValidarSlide index={7} total={total} />
-        </SlideShell>
-
-        <SlideShell index={7} id={slides[7].id}>
-          <AlinhamentoSlide index={8} total={total} />
-        </SlideShell>
-
-        <SlideShell index={8} id={slides[8].id}>
           <ClosingSlide total={total} />
         </SlideShell>
       </div>

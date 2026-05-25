@@ -548,11 +548,13 @@ const PublicationCard = ({ pub }: { pub: Publication }) => {
             className="overflow-hidden border-t border-border/60"
           >
             <div className="p-5 md:p-7 space-y-7">
-              {/* Conceito visual */}
-              <div>
-                <div className="font-editorial text-caption mb-2">Conceito visual</div>
-                <p className="text-foreground/75 text-sm leading-relaxed">{pub.content.visual}</p>
-              </div>
+              {/* Conceito visual (static / carousel) */}
+              {pub.content.kind !== "reels" && (
+                <div>
+                  <div className="font-editorial text-caption mb-2">Conceito visual</div>
+                  <p className="text-foreground/75 text-sm leading-relaxed">{pub.content.visual}</p>
+                </div>
+              )}
 
               {/* Conteúdo específico */}
               {pub.content.kind === "static" && (
